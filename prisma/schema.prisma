@@ -49,8 +49,9 @@ model child {
 }
 
 model childrenToToys {
-  child_id Int @id
+  child_id Int
   toy_id Int
+  id Int @id @default(autoincrement())
 
   toys toy @relation(fields: [toy_id], references: [id])
   children child @relation(fields: [child_id], references: [id])

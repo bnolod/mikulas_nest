@@ -2,6 +2,7 @@ import { HttpStatus, Injectable, Res } from '@nestjs/common';
 import { CreateChildDto } from './dto/create-child.dto';
 import { UpdateChildDto } from './dto/update-child.dto';
 import { PrismaService } from 'src/prisma.service';
+import { Type } from 'class-transformer';
 
 @Injectable()
 export class ChildrenService {
@@ -56,5 +57,23 @@ export class ChildrenService {
   catch(err) {
     throw new Error(err)
   }
+  }
+
+  addToyToChild(childid: number, toyid: number){
+
+    this.findOne(childid)
+    
+    try {
+      return this.prismaService.childrenToToys.create({
+        data: {
+          child_id: childid,
+          toy_id: toyid,
+        }
+      })
+    }
+    catch(err){
+      throw new Error(err)
+    }
+
   }
 }

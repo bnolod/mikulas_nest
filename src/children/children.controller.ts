@@ -1,7 +1,19 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Res } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  Res,
+  Put,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ChildrenService } from './children.service';
 import { CreateChildDto } from './dto/create-child.dto';
 import { UpdateChildDto } from './dto/update-child.dto';
+import { Type } from 'class-transformer';
 
 @Controller('children')
 export class ChildrenController {
@@ -30,5 +42,14 @@ export class ChildrenController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.childrenService.remove(+id);
+  }
+
+  @Put(':childid/toys/:toyid')
+  addToyToChild(
+    
+    @Param('childid', ParseIntPipe) childid: number,
+    @Param('toyid', ParseIntPipe) toyid: number,
+  ) {
+    return this.childrenService.addToyToChild(childid, toyid);
   }
 }

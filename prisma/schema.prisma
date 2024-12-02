@@ -49,7 +49,7 @@ model child {
 }
 
 model childrenToToys {
-  child_id Int @unique
+  child_id Int @id
   toy_id Int
 
   toys toy @relation(fields: [toy_id], references: [id])

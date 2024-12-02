@@ -25,7 +25,7 @@ datasource db {
 model toy {
   name String
   material Material
-  weight Decimal
+  weight Float
   id  Int @id @default(autoincrement())
 
   ctt childrenToToys[]

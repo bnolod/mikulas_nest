@@ -6,7 +6,7 @@ async function main() {
         const child = await prisma.child.create({
             data: {
                 name: faker.person.fullName(),
-                address: faker.location.county()+","+faker.location.streetAddress() ,
+                address: faker.location.country()+","+faker.location.streetAddress() ,
                 behaved: faker.datatype.boolean()
             }
         })

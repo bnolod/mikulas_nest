@@ -12,3 +12,46 @@ datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
+// A játékokról tárolandó adatok:
+// Megnevezés
+// Anyag (lehetséges értékek: wood, metal, plastic, other)
+// Súly (kg-ban)
+
+// A gyerekekről tárolandó adatok:
+// Név
+// Pontos cím (országgal együtt)
+// Jó volt-e vagy sem
+
+model toy {
+  name String
+  material Material
+  weight Decimal
+  id  Int @id @default(autoincrement())
+
+  ctt childrenToToys[]
+}
+
+enum Material {
+  wood
+  metal
+  plastic
+  other
+}
+
+model child {
+  name String
+  address String
+  behaved Boolean
+  id Int @id @default(autoincrement())
+
+  ctt childrenToToys[]
+
+}
+
+model childrenToToys {
+  child_id Int @unique
+  toy_id Int
+
+  toys toy @relation(fields: [toy_id], references: [id])
+  children child @relation(fields: [child_id], references: [id])
+}

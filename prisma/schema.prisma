@@ -51,8 +51,9 @@ model child {
 model childrenToToys {
   child_id Int
   toy_id Int
-  id Int @id @default(autoincrement())
 
-  toys toy @relation(fields: [toy_id], references: [id])
-  children child @relation(fields: [child_id], references: [id])
+  toys toy @relation(fields: [toy_id], references: [id], onDelete: Cascade)
+  children child @relation(fields: [child_id], references: [id], onDelete: Cascade)
+
+  @@unique([child_id,toy_id])
 }

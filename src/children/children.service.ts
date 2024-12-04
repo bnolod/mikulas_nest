@@ -1,44 +1,54 @@
-import { HttpStatus, Injectable, Res } from '@nestjs/common';
+import { BadRequestException, ConflictException, HttpStatus, Injectable, NotAcceptableException, NotFoundException, Res } from '@nestjs/common';
 import { CreateChildDto } from './dto/create-child.dto';
 import { UpdateChildDto } from './dto/update-child.dto';
 import { PrismaService } from 'src/prisma.service';
-import { Type } from 'class-transformer';
+import { ToysService } from 'src/toys/toys.service';
 
 @Injectable()
 export class ChildrenService {
 
-  constructor(private readonly prismaService : PrismaService) {}
+  constructor(
+    private readonly prismaService : PrismaService,
+    private readonly toysService: ToysService) {}
 
-  create(createChildDto: CreateChildDto, @Res() res) {
-    try{ this.prismaService.child.create({
+  async create(createChildDto: CreateChildDto) {
+    try{ await this.prismaService.child.create({
       data:createChildDto
     })
-    return res.status(HttpStatus.CREATED).json("Child created successfully", createChildDto)
+    return createChildDto.name + " sikeresen létrehozva"
   }
   catch(err) {
     throw new Error(err)
   }
   }
 
-  findAll() {
-    return this.prismaService.child.findMany({})
+  async findAll() {
+    return await this.prismaService.child.findMany({
+      include: {
+        ctt : {
+        include: {
+          toys:true
+        }
+      }
+      }
+    })
   }
 
 
-  findOne(id: number) {
+  async findOne(id: number) {
     try {
-    return this.prismaService.child.findUnique({
+    const child = await this.prismaService.child.findUnique({
       where: {id}
     })
   }
   catch(err) {
-    throw new Error(err)
+    throw new NotFoundException("child not found")
   }
   }
 
-  update(id: number, updateChildDto: UpdateChildDto) {
+  async update(id: number, updateChildDto: UpdateChildDto) {
     try {
-    return this.prismaService.child.update({
+    return await this.prismaService.child.update({
       where: {id},
       data: updateChildDto
     })
@@ -48,23 +58,33 @@ export class ChildrenService {
     }
   }
 
-  remove(id: number) {
+  async remove(id: number) {
     try {
-    return this.prismaService.child.delete({
+    return await this.prismaService.child.delete({
       where: {id}
     })
   }
   catch(err) {
-    throw new Error(err)
+    throw new Error("Could not delete")
   }
   }
 
-  addToyToChild(childid: number, toyid: number){
-
-    this.findOne(childid)
-    
+  async addToyToChild(childid: number, toyid: number){
     try {
-      return this.prismaService.childrenToToys.create({
+      if (!this.findOne(childid))
+        {
+          throw new NotFoundException()
+        }
+      if (!this.toysService.findOne(toyid)) 
+        {
+          throw new NotFoundException()
+        }
+  
+      if ((await this.prismaService.child.findUnique({where: {id:childid}})).behaved == false) {
+        throw new ConflictException()
+      }
+
+      return await this.prismaService.childrenToToys.create({
         data: {
           child_id: childid,
           toy_id: toyid,
@@ -72,7 +92,27 @@ export class ChildrenService {
       })
     }
     catch(err){
-      throw new Error(err)
+      throw new ConflictException("Child already has this toy or did not behave.")
+  }
+}
+
+  async removeToyFromChild(childid: number, toyid: number){
+
+    try {
+      const result = await this.prismaService.childrenToToys.deleteMany(
+        {where:
+          {
+            child_id : childid,
+            toy_id : toyid
+          }
+        }
+      )
+      if (result.count == 0) {
+        throw new Error()
+      }
+    }
+    catch(err){
+      throw new BadRequestException(`No child with id ${childid} found with toy id ${toyid} `)
     }
 
   }

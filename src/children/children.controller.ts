@@ -20,8 +20,8 @@ export class ChildrenController {
   constructor(private readonly childrenService: ChildrenService) {}
 
   @Post()
-  create(@Body() createChildDto: CreateChildDto, @Res() res) {
-    return this.childrenService.create(createChildDto, res);
+  create(@Body() createChildDto: CreateChildDto) {
+    return this.childrenService.create(createChildDto);
   }
 
   @Get()
@@ -46,10 +46,18 @@ export class ChildrenController {
 
   @Put(':childid/toys/:toyid')
   addToyToChild(
-    
     @Param('childid', ParseIntPipe) childid: number,
     @Param('toyid', ParseIntPipe) toyid: number,
   ) {
     return this.childrenService.addToyToChild(childid, toyid);
   }
+  
+  @Delete(':childid/toys/:toyid')
+  removeToyFromChild(
+    @Param('childid', ParseIntPipe) childid: number,
+    @Param('toyid', ParseIntPipe) toyid: number,
+  ) {
+    return this.childrenService.removeToyFromChild(childid, toyid);
+  }
+  
 }
